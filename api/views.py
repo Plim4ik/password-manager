@@ -6,9 +6,9 @@ from .models import PasswordEntry
 from .serializers import PasswordEntrySerializer
 
 
-class PasswordEntryViewSet(mixins.CreateModelMixin,  # Добавляет поддержку POST
-                           mixins.RetrieveModelMixin,  # Добавляет поддержку GET по `service_name`
-                           mixins.ListModelMixin,  # Добавляет поддержку GET списка
+class PasswordEntryViewSet(mixins.CreateModelMixin,
+                           mixins.RetrieveModelMixin,
+                           mixins.ListModelMixin,
                            viewsets.GenericViewSet):
     """ViewSet для управления паролями"""
     permission_classes = [IsAuthenticated]
