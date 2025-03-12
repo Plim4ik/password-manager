@@ -1,9 +1,11 @@
 from rest_framework import viewsets, mixins
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.exceptions import NotAuthenticated
 from django.shortcuts import get_object_or_404
 from .models import PasswordEntry
 from .serializers import PasswordEntrySerializer
+
 
 
 class PasswordEntryViewSet(mixins.CreateModelMixin,  
@@ -42,3 +44,9 @@ class PasswordEntryViewSet(mixins.CreateModelMixin,
         password_entry = get_object_or_404(PasswordEntry, user=request.user, service_name=service_name)
         serializer = self.get_serializer(password_entry)
         return Response(serializer.data)
+    
+    def permission_denied(self, request, message=None, code=None):
+        """Возвращает кастомный ответ для неавторизованных пользователей"""
+        if not request.user or request.user.is_anonymous:
+            raise NotAuthenticated(detail="You are not authorized! Please log in.")
+        super().permission_denied(request, message, code)
