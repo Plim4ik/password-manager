@@ -6,7 +6,6 @@ from rest_framework.exceptions import NotAuthenticated
 from django.shortcuts import get_object_or_404
 from .models import PasswordEntry
 from .serializers import PasswordEntrySerializer
-from rest_framework.exceptions import ValidationError
 
 
 class PasswordEntryViewSet(mixins.CreateModelMixin,
