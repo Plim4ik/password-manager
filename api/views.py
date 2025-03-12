@@ -6,22 +6,22 @@ from rest_framework.exceptions import NotAuthenticated
 from django.shortcuts import get_object_or_404
 from .models import PasswordEntry
 from .serializers import PasswordEntrySerializer
+from rest_framework.exceptions import ValidationError
 
 
 class PasswordEntryViewSet(mixins.CreateModelMixin,
                            mixins.RetrieveModelMixin,
                            mixins.ListModelMixin,
                            viewsets.GenericViewSet):
-    """ViewSet для управления паролями (шифрованное хранилище)"""
     permission_classes = [IsAuthenticated]
     serializer_class = PasswordEntrySerializer
 
     def get_queryset(self):
         """Фильтруем пароли только по пользователю и по имени сервиса, если указано"""
-        search_query = self.request.GET.get("service_name", "")
-        if search_query:
-            return PasswordEntry.objects.filter(user=self.request.user, service_name__icontains=search_query)
-        return PasswordEntry.objects.filter(user=self.request.user)
+        search_query = self.request.GET.get("service_name")
+        if not search_query:
+            raise ValidationError("service_name parameter is required for search.")
+        return PasswordEntry.objects.filter(user=self.request.user, service_name__icontains=search_query)
 
 
     def create(self, request, *args, **kwargs):
