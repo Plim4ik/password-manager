@@ -23,6 +23,7 @@ class PasswordEntryViewSet(mixins.CreateModelMixin,
             return PasswordEntry.objects.filter(user=self.request.user, service_name__icontains=search_query)
         return PasswordEntry.objects.filter(user=self.request.user)
 
+
     def create(self, request, *args, **kwargs):
         """Создать или обновить пароль"""
         service_name = kwargs.get("service_name")
@@ -40,6 +41,13 @@ class PasswordEntryViewSet(mixins.CreateModelMixin,
         serializer = self.get_serializer(password_entry)
         return Response(serializer.data)
 
+    @extend_schema(
+        responses={200: PasswordEntrySerializer},
+        description="Получить пароль по имени сервиса.",
+        parameters=[
+            OpenApiParameter("service_name", str, OpenApiParameter.PATH, description="Имя сервиса для поиска пароля")
+        ]
+    )
     def retrieve(self, request, *args, **kwargs):
         """Получить пароль по имени сервиса"""
         service_name = kwargs.get("service_name")
@@ -50,7 +58,9 @@ class PasswordEntryViewSet(mixins.CreateModelMixin,
     @extend_schema(
         parameters=[
             OpenApiParameter("service_name", str, OpenApiParameter.QUERY, description="Часть имени сервиса для поиска")
-        ]
+        ],
+        responses={200: PasswordEntrySerializer(many=True)},
+        description="Поиск паролей по части имени сервиса"
     )
     def search(self, request, *args, **kwargs):
         """Поиск паролей по части имени сервиса"""
@@ -59,16 +69,10 @@ class PasswordEntryViewSet(mixins.CreateModelMixin,
         if not search_query:
             return Response({"detail": "service_name parameter is required for search."}, status=400)
 
-        # Выводим поисковый запрос для отладки
-        print(f"Search query: {search_query}")
-
         password_entries = PasswordEntry.objects.filter(
             user=request.user,
             service_name__icontains=search_query
         )
-        
-        # Выводим количество найденных записей для отладки
-        print(f"Found {password_entries.count()} entries.")
 
         if not password_entries.exists():
             return Response({"detail": "No PasswordEntry matches the given query."}, status=404)
@@ -76,7 +80,10 @@ class PasswordEntryViewSet(mixins.CreateModelMixin,
         serializer = self.get_serializer(password_entries, many=True)
         return Response(serializer.data)
 
-
+    @extend_schema(
+        responses={403: OpenApiParameter(str, OpenApiParameter.QUERY, description="Ошибка доступа")},
+        description="Возвращает кастомный ответ для неавторизованных пользователей"
+    )
     def permission_denied(self, request, message=None, code=None):
         """Возвращает кастомный ответ для неавторизованных пользователей"""
         if not request.user or request.user.is_anonymous:
