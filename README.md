@@ -104,20 +104,21 @@ FERNET_KEY=s00YJBWgTI_NJzDY_UJ3wJapbd7ZFznd1u3RkZ2iBUY=
 
 ## **API Endpoints**
 
+### **Password Management Endpoints**
 
-### **Password Management**
 | Method | Endpoint                          | Description                     |
 |--------|----------------------------------|---------------------------------|
 | `GET`  | `/password/`                     | List all stored passwords       |
-| `POST` | `/password/<service_name>/`      | Create/update a password entry  |
-| `GET`  | `/password/<service_name>/`      | Retrieve a password entry       |
+| `POST` | `/password/<str:service_name>/`  | Create or update a password entry for a service |
+| `GET`  | `/password/<str:service_name>/`  | Retrieve a specific password entry for a service |
+| `GET`  | `/password/search/`              | Search for password entries based on a query |
 
 ---
 
 ## **Testing the API**
 Run the test suite inside the container:
 ```sh
-docker-compose exec app python manage.py test
+docker compose exec app python manage.py test
 ```
 
 ---
