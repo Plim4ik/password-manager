@@ -1,15 +1,7 @@
-# utils.py
-from cryptography.fernet import Fernet
+from rest_framework import serializers
+from .models import PasswordEntry
 
-class PasswordEncryptor:
-    def __init__(self, master_password):
-        self.master_password = master_password.encode()
-        self.cipher = Fernet(Fernet.generate_key())  # Генерация ключа на основе мастер-пароля
-
-    def encrypt(self, password):
-        """Шифрование пароля."""
-        return self.cipher.encrypt(password.encode()).decode()
-
-    def decrypt(self, encrypted_password):
-        """Расшифровка пароля."""
-        return self.cipher.decrypt(encrypted_password.encode()).decode()
+class PasswordEntrySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PasswordEntry
+        fields = ['service_name', 'password']

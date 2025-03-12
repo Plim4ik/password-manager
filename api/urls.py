@@ -1,12 +1,7 @@
-# api/urls.py
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from .views import PasswordViewSet
-
-router = DefaultRouter()
-router.register(r'password', PasswordViewSet, basename='password')
-
+from django.urls import path
+from .views import PasswordEntryViewSet
 
 urlpatterns = [
-    path('', include(router.urls)),
+    path('password/<str:service_name>/', PasswordEntryViewSet.as_view({'post': 'create', 'get': 'retrieve'})),
+    path('password/', PasswordEntryViewSet.as_view({'get': 'list'})),
 ]
