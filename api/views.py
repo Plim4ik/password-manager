@@ -17,12 +17,8 @@ class PasswordEntryViewSet(mixins.CreateModelMixin,
     serializer_class = PasswordEntrySerializer
 
     def get_queryset(self):
-        """Фильтруем пароли только по пользователю и по имени сервиса, если указано"""
-        search_query = self.request.GET.get("service_name")
-        if not search_query:
-            raise ValidationError("service_name parameter is required for search.")
-        return PasswordEntry.objects.filter(user=self.request.user, service_name__icontains=search_query)
-
+        """Возвращаем все пароли для авторизованного пользователя"""
+        return PasswordEntry.objects.filter(user=self.request.user)
 
     def create(self, request, *args, **kwargs):
         """Создать или обновить пароль"""
