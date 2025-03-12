@@ -1,0 +1,29 @@
+# Игнорируем виртуальные окружения
+venv/
+.venv/
+env/
+
+# Игнорируем системные файлы и кэш
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Игнорируем файлы конфигурации редакторов и IDE
+*.idea/
+*.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# Игнорируем файлы логов
+*.log
+
+# Игнорируем файлы Docker, которые не нужны внутри контейнера
+Dockerfile
+docker-compose.yml
+prod.docker-compose.yml
+dev.docker-compose.yml
+
+
+# Temp Dev Files
+temp/
