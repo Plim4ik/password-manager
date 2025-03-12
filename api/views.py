@@ -6,11 +6,11 @@ from .models import PasswordEntry
 from .serializers import PasswordEntrySerializer
 
 
-class PasswordEntryViewSet(mixins.CreateModelMixin,
+class PasswordEntryViewSet(mixins.CreateModelMixin,  
                            mixins.RetrieveModelMixin,
                            mixins.ListModelMixin,
                            viewsets.GenericViewSet):
-    """ViewSet для управления паролями"""
+    """ViewSet для управления паролями (шифрованное хранилище)"""
     permission_classes = [IsAuthenticated]
     serializer_class = PasswordEntrySerializer
 
@@ -22,11 +22,17 @@ class PasswordEntryViewSet(mixins.CreateModelMixin,
     def create(self, request, *args, **kwargs):
         """Создать или обновить пароль"""
         service_name = kwargs.get("service_name")
+        password = request.data.get("password")
+
+        if not password:
+            return Response({"error": "Password is required"}, status=400)
+
         password_entry, created = PasswordEntry.objects.update_or_create(
             user=request.user,
             service_name=service_name,
-            defaults={"password": request.data.get("password")}
+            defaults={"encrypted_password": PasswordEntry().encrypt_password(password)}
         )
+
         serializer = self.get_serializer(password_entry)
         return Response(serializer.data)
 
