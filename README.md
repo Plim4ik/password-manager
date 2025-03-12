@@ -98,7 +98,8 @@ FERNET_KEY=s00YJBWgTI_NJzDY_UJ3wJapbd7ZFznd1u3RkZ2iBUY=
    Follow the prompts to set up the admin credentials.
 
 6. **Access the API:**
-   - API base URL: `http://localhost:8000/api/schema/swagger-ui/`
+   - Swagger UI: Access the OpenAPI documentation at the Swagger UI endpoint: `http://localhost:8000/api/schema/swagger-ui/`
+   - Redoc: Access the OpenAPI documentation at the Redoc endpoint: `http://localhost:8000/api/schema/redoc/`
    - Django Admin: `http://localhost:8000/admin/`
 
 ---
