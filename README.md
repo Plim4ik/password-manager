@@ -44,6 +44,7 @@ The Password Manager API is a secure password storage system built using Django 
 ├── manage.py
 ├── requirements.pip
 └── template.env
+└── ruff.toml
 ```
 
 ---
