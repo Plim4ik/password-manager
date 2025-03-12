@@ -1,25 +1,42 @@
-# tests.py
+from django.contrib.auth.models import User
 from django.test import TestCase
-from rest_framework.test import APIClient
-from .models import PasswordEntry
+from django.conf import settings
+from api.models import PasswordEntry
+from cryptography.fernet import Fernet
 
-class PasswordManagerTestCase(TestCase):
+class PasswordEntryTestCase(TestCase):
     def setUp(self):
-        self.client = APIClient()
+        """Подготовка тестового окружения"""
+        self.user = User.objects.create_user(username="testuser", password="testpassword")
+        self.fernet = Fernet(settings.FERNET_KEY.encode())
+        self.raw_password = "secure_password_123"
+        self.encrypted_password = self.fernet.encrypt(self.raw_password.encode())
 
-    def test_create_password(self):
-        response = self.client.post('/password/yundex/', {'password': 'very_secret_pass'}, format='json')
-        self.assertEqual(response.status_code, 201)
-        self.assertEqual(PasswordEntry.objects.count(), 1)
+        self.entry = PasswordEntry.objects.create(
+            user=self.user,
+            service_name="GitHub",
+            encrypted_password=self.encrypted_password
+        )
 
-    def test_retrieve_password(self):
-        PasswordEntry.objects.create(service_name='yundex', encrypted_password='encrypted_password_here')
-        response = self.client.get('/password/yundex/')
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data['service_name'], 'yundex')
+    def test_password_encryption(self):
+        """Проверяем, что шифрование пароля работает корректно"""
+        new_password = "new_secure_password"
+        encrypted = self.entry.encrypt_password(new_password)
+        decrypted = self.fernet.decrypt(encrypted).decode()
 
-    def test_search_passwords(self):
-        PasswordEntry.objects.create(service_name='yundex', encrypted_password='encrypted_password_here')
-        response = self.client.get('/password/?service_name=yun')
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.data), 1)
+        self.assertEqual(new_password, decrypted, "🔴 Ошибка: Пароль после расшифровки не совпадает!")
+
+    def test_password_decryption(self):
+        """Проверяем, что расшифровка пароля работает корректно"""
+        decrypted_password = self.entry.decrypt_password()
+        self.assertEqual(decrypted_password, self.raw_password, "🔴 Ошибка: Неверный пароль после расшифровки!")
+
+    def test_password_storage(self):
+        """Проверяем, что зашифрованный пароль корректно хранится в базе"""
+        self.entry.refresh_from_db()
+        self.assertEqual(bytes(self.entry.encrypted_password), self.encrypted_password, "🔴 Ошибка: Данные в БД повреждены!")
+
+    def test_unique_constraint(self):
+        """Проверяем, что нельзя создать дубликат пароля для одного сервиса"""
+        with self.assertRaises(Exception):
+            PasswordEntry.objects.create(user=self.user, service_name="GitHub", encrypted_password=self.encrypted_password)

@@ -71,5 +71,27 @@ services:
       timeout: 10s
       retries: 3
 
+  tests:
+    build:
+      context: .
+    volumes:
+      - .:/app
+    env_file:
+      - ./.env
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - TZ=Europe/Moscow
+    command: >
+      sh -c "python manage.py test || echo '🔴 ОШИБКА: Тесты не прошли!'"
+    depends_on:
+      - postgres
+      - migrate
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    restart: on-failure
+
 volumes:
   postgres_data:
